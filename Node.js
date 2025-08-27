@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB (using free MongoDB Atlas cluster)
-mongoose.connect('mongodb+srv://username:password@cluster0.mongodb.net/contractgen?retryWrites=true&w=majority', {
+mongoose.connect('mongodb+srv://drmzhaider:<haider250>@testcluster1.frcjvgh.mongodb.net/?retryWrites=true&w=majority&appName=TestCluster1', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
