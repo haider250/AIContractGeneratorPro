@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional AI Contract Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --purple: #9b59b6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #1a2530 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .app-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .sidebar {
+            flex: 0 0 250px;
+            background: var(--light);
+            padding: 20px;
+            border-right: 1px solid #ddd;
+        }
+        
+        .form-section {
+            flex: 1;
+            min-width: 300px;
+            padding: 25px;
+            background: white;
+        }
+        
+        .preview-section {
+            flex: 2;
+            min-width: 500px;
+            padding: 25px;
+            background: white;
+            border-left: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        button {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-generate {
+            background: var(--success);
+        }
+        
+        .btn-generate:hover {
+            background: #219653;
+        }
+        
+        .btn-pdf {
+            background: var(--accent);
+        }
+        
+        .btn-pdf:hover {
+            background: #c0392b;
+        }
+        
+        .btn-docx {
+            background: var(--warning);
+        }
+        
+        .btn-docx:hover {
+            background: #e67e22;
+        }
+        
+        .btn-purple {
+            background: var(--purple);
+        }
+        
+        .btn-purple:hover {
+            background: #8e44ad;
+        }
+        
+        .contract-preview {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 10px;
+            overflow-y: auto;
+            min-height: 500px;
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.8;
+            background: #f9f9f9;
+        }
+        
+        .contract-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .contract-title {
+            font-size: 28px;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .contract-section {
+            margin-bottom: 25px;
+        }
+        
+        .contract-section-title {
+            font-weight: bold;
+            font-size: 20px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+            color: var(--dark);
+        }
+        
+        .signature-area {
+            margin-top: 60px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .signature-line {
+            width: 250px;
+            border-top: 1px solid #000;
+            padding-top: 40px;
+        }
+        
+        .disclaimer {
+            background: #ffe6e6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+            font-size: 14px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .template-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .template-btn {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            padding: 15px;
+            background: #eee;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .template-btn.active {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .input-row .form-group {
+            flex: 1;
+        }
+        
+        .feature-tag {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--secondary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .nav-item:hover {
+            background: #ddd;
+        }
+        
+        .nav-item.active {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .clause-library {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .clause-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .clause-item:hover {
+            border-color: var(--secondary);
+            background: #f0f8ff;
+        }
+        
+        .signature-pad {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 20px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .signature-canvas {
+            border: 1px solid #ddd;
+            background: white;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        .ai-suggestion {
+            background: #e8f4fc;
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .collaborator-list {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .collaborator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: #eee;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .login-section {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-form {
+            display: none;
+        }
+        
+        .register-form {
+            display: none;
+        }
+        
+        .active-form {
+            display: block;
+        }
+        
+        @media (max-width: 1100px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                flex: 1;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+            
+            .form-section, .preview-section {
+                min-width: 100%;
+            }
+            
+            .preview-section {
+                border-left: none;
+                border-top: 1px solid #ddd;
+            }
+            
+            .input-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .clause-library {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <div class="login-section" id="auth-section">
+            <h2 class="section-title"><i class="fas fa-lock"></i> AI Contract Generator</h2>
+            
+            <div class="form-group">
+                <button onclick="showLoginForm()">Login</button>
+                <button onclick="showRegisterForm()">Register</button>
+            </div>
+            
+            <div class="login-form" id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="Enter your password">
+                </div>
+                
+                <button class="btn-generate" onclick="login()">Login</button>
+            </div>
+            
+            <div class="register-form" id="register-form">
+                <div class="form-group">
+                    <label for="register-name">Full Name</label>
+                    <input type="text" id="register-name" placeholder="Enter your full name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" placeholder="Create a password">
+                </div>
+                
+                <button class="btn-generate" onclick="register()">Register</button>
+            </div>
+        </div>
+        
+        <div class="container" id="main-app" style="display: none;">
+            <header>
+                <h1><i class="fas fa-file-contract"></i> Advanced AI Contract Generator</h1>
+                <p class="subtitle">Create, customize, and collaborate on professional legal contracts with AI assistance</p>
+                <button style="position: absolute; top: 20px; right: 20px;" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </header>
+            
+            <div class="app-container">
+                <div class="sidebar">
+                    <div class="user-section">
+                        <div class="user-avatar" id="user-avatar">JD</div>
+                        <div>
+                            <div id="user-name">John Doe</div>
+                            <div style="font-size: 0.8rem; opacity: 0.8;">Professional Plan</div>
+                        </div>
+                    </div>
+                    
+                    <div class="nav-item active">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>New Contract</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-folder"></i>
+                        <span>My Templates</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-users"></i>
+                        <span>Collaborations</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-book"></i>
+                        <span>Clause Library</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-magic"></i>
+                        <span>AI Assistant</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-history"></i>
+                        <span>History</span>
+                    </div>
+                    <div class="nav-item">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2 class="section-title"><i class="fas fa-edit"></i> Contract Details</h2>
+                    
+                    <div class="template-selector">
+                        <div class="template-btn active" data-template="fixed">Fixed-Price</div>
+                        <div class="template-btn" data-template="retainer">Retainer</div>
+                        <div class="template-btn" data-template="nda">NDA</div>
+                        <div class="template-btn" data-template="saas">SaaS</div>
+                        <div class="template-btn" data-template="consulting">Consulting</div>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="clientName">Client Name <span class="feature-tag">Core</span></label>
+                            <input type="text" id="clientName" placeholder="Enter client's full name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="providerName">Your Name/Company <span class="feature-tag">Core</span></label>
+                            <input type="text" id="providerName" placeholder="Enter your name or company name">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="projectDescription">Project Description <span class="feature-tag">Core</span></label>
+                        <textarea id="projectDescription" placeholder="Describe the project or services to be provided"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="projectScope">Project Scope <span class="feature-tag">Advanced</span></label>
+                        <textarea id="projectScope" placeholder="Detail the specific deliverables, milestones, and inclusions"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="paymentTerms">Payment Terms <span class="feature-tag">Core</span></label>
+                        <textarea id="paymentTerms" placeholder="Payment schedule, methods, and terms"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="deadlines">Deadlines & Milestones <span class="feature-tag">Core</span></label>
+                        <textarea id="deadlines" placeholder="Key dates and milestones"></textarea>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="form-group">
+                            <label for="startDate">Start Date <span class="feature-tag">Core</span></label>
+                            <input type="date" id="startDate">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="endDate">End Date <span class="feature-tag">Core</span></label>
+                            <input type="date" id="endDate">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="jurisdiction">Governing Law (Jurisdiction) <span class="feature-tag">Advanced</span></label>
+                        <input type="text" id="jurisdiction" placeholder="E.g., State of California">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>AI Clause Suggestions <span class="feature-tag">AI</span></label>
+                        <div class="ai-suggestion" onclick="addClause('confidentiality')">
+                            <strong>Confidentiality Clause</strong>
+                            <p>Both parties agree not to disclose any confidential information received from the other party.</p>
+                        </div>
+                        <div class="ai-suggestion" onclick="addClause('termination')">
+                            <strong>Termination Clause</strong>
+                            <p>Either party may terminate this agreement with 30 days written notice.</p>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-generate" onclick="generateContract()">
+                        <i class="fas fa-bolt"></i><span>Generate Contract</span>
+                    </button>
+                    
+                    <div class="disclaimer">
+                        <strong>Disclaimer:</strong> This contract generator provides templates for convenience only and does not constitute legal advice. 
+                        It is recommended to have all contracts reviewed by a qualified attorney to ensure they meet your specific needs and comply with local laws.
+                    </div>
+                </div>
+                
+                <div class="preview-section">
+                    <h2 class="section-title"><i class="fas fa-eye"></i> Contract Preview</h2>
+                    
+                    <div class="action-buttons" style="margin-top: 0;">
+                        <button class="btn-pdf" onclick="exportPDF()">
+                            <i class="fas fa-file-pdf"></i><span>Export PDF</span>
+                        </button>
+                        <button class="btn-docx" onclick="exportDOCX()">
+                            <i class="fas fa-file-word"></i><span>Export DOCX</span>
+                        </button>
+                        <button class="btn-purple" onclick="showSignatureModal()">
+                            <i class="fas fa-signature"></i><span>Add Signature</span>
+                        </button>
+                        <button onclick="showClauseLibrary()">
+                            <i class="fas fa-book"></i><span>Clause Library</span>
+                        </button>
+                    </div>
+                    
+                    <div class="contract-preview" id="contractPreview">
+                        <div class="contract-header">
+                            <div class="contract-title">Professional Services Agreement</div>
+                            <p>Fill out the form and click "Generate Contract" to create your customized contract</p>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button onclick="saveTemplate()">
+                            <i class="fas fa-save"></i><span>Save Template</span>
+                        </button>
+                        <button onclick="addCollaborator()">
+                            <i class="fas fa-user-plus"></i><span>Add Collaborator</span>
+                        </button>
+                        <button onclick="printContract()">
+                            <i class="fas fa-print"></i><span>Print</span>
+                        </button>
+                        <button onclick="clearForm()">
+                            <i class="fas fa-trash"></i><span>Clear Form</span>
+                        </button>
+                    </div>
+                    
+                    <div class="collaborator-list">
+                        <div class="collaborator">
+                            <i class="fas fa-user"></i> You (Owner)
+                        </div>
+                        <div class="collaborator">
+                            <i class="fas fa-user"></i> jane@lawfirm.com
+                        </div>
+                        <div class="collaborator">
+                            <i class="fas fa-user"></i> michael@client.com
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clause Library Modal -->
+    <div class="modal" id="clauseLibraryModal">
+        <div class="modal-content">
+            <h2 class="section-title"><i class="fas fa-book"></i> Clause Library</h2>
+            <p>Select a clause to add to your contract:</p>
+            
+            <div class="clause-library">
+                <div class="clause-item" onclick="addClause('confidentiality')">
+                    <h3>Confidentiality</h3>
+                    <p>Both parties agree to keep confidential information secure.</p>
+                </div>
+                <div class="clause-item" onclick="addClause('intellectualProperty')">
+                    <h3>Intellectual Property</h3>
+                    <p>Specifies ownership of work product and intellectual property.</p>
+                </div>
+                <div class="clause-item" onclick="addClause('limitationLiability')">
+                    <h3>Limitation of Liability</h3>
+                    <p>Limits the amount of liability each party can claim.</p>
+                </div>
+                <div class="clause-item" onclick="addClause('termination')">
+                    <h3>Termination</h3>
+                    <p>Conditions under which the contract can be terminated.</p>
+                </div>
+                <div class="clause-item" onclick="addClause('governingLaw')">
+                    <h3>Governing Law</h3>
+                    <p>Specifies which state's laws govern the agreement.</p>
+                </div>
+                <div class="clause-item" onclick="addClause('disputeResolution')">
+                    <h3>Dispute Resolution</h3>
+                    <p>Outlines process for resolving disputes.</p>
+                </div>
+            </div>
+            
+            <button style="margin-top: 20px;" onclick="hideModal('clauseLibraryModal')">
+                <i class="fas fa-times"></i> Close
+            </button>
+        </div>
+    </div>
+    
+    <!-- Signature Modal -->
+    <div class="modal" id="signatureModal">
+        <div class="modal-content">
+            <h2 class="section-title"><i class="fas fa-signature"></i> Add Digital Signature</h2>
+            
+            <div class="signature-pad">
+                <p>Sign in the box below:</p>
+                <canvas class="signature-canvas" width="500" height="200"></canvas>
+                
+                <div>
+                    <button onclick="clearSignature()">
+                        <i class="fas fa-eraser"></i> Clear
+                    </button>
+                    <button class="btn-generate" onclick="saveSignature()">
+                        <i class="fas fa-check"></i> Save Signature
+                    </button>
+                </div>
+            </div>
+            
+            <button style="margin-top: 20px;" onclick="hideModal('signatureModal')">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Authentication functions
+        function showLoginForm() {
+            document.getElementById('login-form').classList.add('active-form');
+            document.getElementById('register-form').classList.remove('active-form');
+        }
+        
+        function showRegisterForm() {
+            document.getElementById('register-form').classList.add('active-form');
+            document.getElementById('login-form').classList.remove('active-form');
+        }
+        
+        function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            // Simulate authentication
+            if (email && password) {
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                
+                // Set user data
+                document.getElementById('user-name').textContent = email.split('@')[0];
+                document.getElementById('user-avatar').textContent = email[0].toUpperCase();
+                
+                // Generate a basic contract on load
+                generateContract();
+            } else {
+                alert('Please enter email and password');
+            }
+        }
+        
+        function register() {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            
+            // Simulate registration
+            if (name && email && password) {
+                alert('Registration successful! Please login.');
+                showLoginForm();
+                
+                // Pre-fill login form
+                document.getElementById('login-email').value = email;
+            } else {
+                alert('Please fill all fields');
+            }
+        }
+        
+        function logout() {
+            document.getElementById('auth-section').style.display = 'block';
+            document.getElementById('main-app').style.display = 'none';
+            
+            // Clear forms
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('register-name').value = '';
+            document.getElementById('register-email').value = '';
+            document.getElementById('register-password').value = '';
+        }
+        
+        // Set default dates
+        document.getElementById('startDate').valueAsDate = new Date();
+        let endDate = new Date();
+        endDate.setMonth(endDate.getMonth() + 1);
+        document.getElementById('endDate').valueAsDate = endDate;
+        
+        // Template selection
+        const templateButtons = document.querySelectorAll('.template-btn');
+        let selectedTemplate = 'fixed';
+        
+        templateButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                templateButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedTemplate = btn.dataset.template;
+                generateContract();
+            });
+        });
+        
+        // Generate contract function
+        function generateContract() {
+            const clientName = document.getElementById('clientName').value || '[Client Name]';
+            const providerName = document.getElementById('providerName').value || '[Your Name/Company]';
+            const projectDescription = document.getElementById('projectDescription').value || '[Project description]';
+            const projectScope = document.getElementById('projectScope').value || '[Project scope details]';
+            const paymentTerms = document.getElementById('paymentTerms').value || '[Payment terms]';
+            const deadlines = document.getElementById('deadlines').value || '[Deadlines and milestones]';
+            const startDate = document.getElementById('startDate').value || '[Start Date]';
+            const endDate = document.getElementById('endDate').value || '[End Date]';
+            const jurisdiction = document.getElementById('jurisdiction').value || '[Governing Law Jurisdiction]';
+            
+            let contractHTML = '';
+            
+            // Template selection
+            if (selectedTemplate === 'fixed') {
+                contractHTML = generateFixedPriceContract(clientName, providerName, projectDescription, projectScope, paymentTerms, deadlines, startDate, endDate, jurisdiction);
+            } else if (selectedTemplate === 'retainer') {
+                contractHTML = generateRetainerContract(clientName, providerName, projectDescription, projectScope, paymentTerms, deadlines, startDate, endDate, jurisdiction);
+            } else if (selectedTemplate === 'nda') {
+                contractHTML = generateNDAContract(clientName, providerName, projectDescription, startDate, endDate, jurisdiction);
+            } else if (selectedTemplate === 'saas') {
+                contractHTML = generateSaaSContract(clientName, providerName, projectDescription, paymentTerms, startDate, endDate, jurisdiction);
+            } else if (selectedTemplate === 'consulting') {
+                contractHTML = generateConsultingContract(clientName, providerName, projectDescription, projectScope, paymentTerms, deadlines, startDate, endDate, jurisdiction);
+            }
+            
+            document.getElementById('contractPreview').innerHTML = contractHTML;
+        }
+        
+        // Contract templates
+        function generateFixedPriceContract(clientName, providerName, projectDescription, projectScope, paymentTerms, deadlines, startDate, endDate, jurisdiction) {
+            return `
+                <div class="contract-header">
+                    <div class="contract-title">Fixed-Price Professional Services Agreement</div>
+                    <p>Agreement dated: ${formatDate(startDate)}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <p>This Agreement is made and effective as of ${formatDate(startDate)} between:</p>
+                    <p><strong>${providerName}</strong> (hereinafter referred to as "Service Provider")</p>
+                    <p>AND</p>
+                    <p><strong>${clientName}</strong> (hereinafter referred to as "Client")</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">1. Services</div>
+                    <p>The Service Provider agrees to provide the following services: ${projectDescription}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">2. Scope of Work</div>
+                    <p>${projectScope}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">3. Compensation</div>
+                    <p>${paymentTerms}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">4. Timeline</div>
+                    <p>The project will begin on ${formatDate(startDate)} and is estimated to be completed by ${formatDate(endDate)}.</p>
+                    <p>Key milestones and deadlines: ${deadlines}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">5. Intellectual Property</div>
+                    <p>Upon full payment, the Client will own all intellectual property rights to the work product created by the Service Provider for this project.</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">6. Confidentiality</div>
+                    <p>Both parties agree to keep confidential any proprietary information received from the other party during the term of this agreement.</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">7. Termination</div>
+                    <p>Either party may terminate this agreement with written notice if the other party breaches any material term of this agreement.</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">8. Governing Law</div>
+                    <p>This Agreement shall be governed by and construed in accordance with the laws of ${jurisdiction}.</p>
+                </div>
+                
+                <div class="signature-area">
+                    <div class="signature-line">
+                        <p>Service Provider: ${providerName}</p>
+                        <p>Signature: _________________________</p>
+                        <p>Date: _________________________</p>
+                    </div>
+                    <div class="signature-line">
+                        <p>Client: ${clientName}</p>
+                        <p>Signature: _________________________</p>
+                        <p>Date: _________________________</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function generateRetainerContract(clientName, providerName, projectDescription, projectScope, paymentTerms, deadlines, startDate, endDate, jurisdiction) {
+            return `
+                <div class="contract-header">
+                    <div class="contract-title">Retainer Services Agreement</div>
+                    <p>Agreement dated: ${formatDate(startDate)}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <p>This Agreement is made and effective as of ${formatDate(startDate)} between:</p>
+                    <p><strong>${providerName}</strong> (hereinafter referred to as "Service Provider")</p>
+                    <p>AND</p>
+                    <p><strong>${clientName}</strong> (hereinafter referred to as "Client")</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">1. Services</div>
+                    <p>The Service Provider agrees to provide ongoing services as needed: ${projectDescription}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">2. Scope of Work</div>
+                    <p>${projectScope}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">3. Retainer Fee</div>
+                    <p>${paymentTerms}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">4. Term</div>
+                    <p>This retainer agreement will begin on ${formatDate(startDate)} and continue until ${formatDate(endDate)}, unless terminated earlier as provided in this agreement.</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">5. Termination</div>
+                    <p>Either party may terminate this agreement with 30 days written notice to the other party.</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">6. Governing Law</div>
+                    <p>This Agreement shall be governed by and construed in accordance with the laws of ${jurisdiction}.</p>
+                </div>
+                
+                <div class="signature-area">
+                    <div class="signature-line">
+                        <p>Service Provider: ${providerName}</p>
+                        <p>Signature: _________________________</p>
+                        <p>Date: _________________________</p>
+                    </div>
+                    <div class="signature-line">
+                        <p>Client: ${clientName}</p>
+                        <p>Signature: _________________________</p>
+                        <p>Date: _________________________</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function generateNDAContract(clientName, providerName, projectDescription, startDate, endDate, jurisdiction) {
+            return `
+                <div class="contract-header">
+                    <div class="contract-title">Non-Disclosure Agreement</div>
+                    <p>Agreement dated: ${formatDate(startDate)}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <p>This Agreement is made and effective as of ${formatDate(startDate)} between:</p>
+                    <p><strong>${providerName}</strong> (hereinafter referred to as "Disclosing Party")</p>
+                    <p>AND</p>
+                    <p><strong>${clientName}</strong> (hereinafter referred to as "Receiving Party")</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">1. Purpose</div>
+                    <p>The Receiving Party agrees to receive confidential information relating to: ${projectDescription}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">2. Confidential Information</div>
+                    <p>Confidential Information refers to any data or information that is proprietary to the Disclosing Party.</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">3. Obligations</div>
+                    <p>The Receiving Party shall hold and maintain the Confidential Information in strictest confidence for the sole and exclusive benefit of the Disclosing Party.</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">4. Time Period</div>
+                    <p>This NDA remains in effect for a period of 2 years from the date of disclosure of the Confidential Information.</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">5. Return of Information</div>
+                    <p>Upon termination of this Agreement, the Receiving Party will return all documents and media containing Confidential Information.</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">6. Governing Law</div>
+                    <p>This Agreement shall be governed by and construed in accordance with the laws of ${jurisdiction}.</p>
+                </div>
+                
+                <div class="signature-area">
+                    <div class="signature-line">
+                        <p>Disclosing Party: ${providerName}</p>
+                        <p>Signature: _________________________</p>
+                        <p>Date: _________________________</p>
+                    </div>
+                    <div class="signature-line">
+                        <p>Receiving Party: ${clientName}</p>
+                        <p>Signature: _________________________</p>
+                        <p>Date: _________________________</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function generateSaaSContract(clientName, providerName, projectDescription, paymentTerms, startDate, endDate, jurisdiction) {
+            return `
+                <div class="contract-header">
+                    <div class="contract-title">SaaS Agreement</div>
+                    <p>Agreement dated: ${formatDate(startDate)}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <p>This Agreement is made and effective as of ${formatDate(startDate)} between:</p>
+                    <p><strong>${providerName}</strong> (hereinafter referred to as "Service Provider")</p>
+                    <p>AND</p>
+                    <p><strong>${clientName}</strong> (hereinafter referred to as "Client")</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">1. Services</div>
+                    <p>The Service Provider agrees to provide access to its software as a service: ${projectDescription}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">2. Subscription</div>
+                    <p>The Client agrees to pay for a subscription to the Service Provider's software as outlined in the payment terms.</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">3. Payment Terms</div>
+                    <p>${paymentTerms}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">4. Term</div>
+                    <p>This agreement will begin on ${formatDate(startDate)} and continue until ${formatDate(endDate)}.</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">5. Data Privacy</div>
+                    <p>The Service Provider agrees to maintain appropriate data protection measures to safeguard Client data.</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">6. Service Level Agreement</div>
+                    <p>The Service Provider guarantees 99.9% uptime for the service, excluding scheduled maintenance.</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">7. Governing Law</div>
+                    <p>This Agreement shall be governed by and construed in accordance with the laws of ${jurisdiction}.</p>
+                </div>
+                
+                <div class="signature-area">
+                    <div class="signature-line">
+                        <p>Service Provider: ${providerName}</p>
+                        <p>Signature: _________________________</p>
+                        <p>Date: _________________________</p>
+                    </div>
+                    <div class="signature-line">
+                        <p>Client: ${clientName}</p>
+                        <p>Signature: _________________________</p>
+                        <p>Date: _________________________</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function generateConsultingContract(clientName, providerName, projectDescription, projectScope, paymentTerms, deadlines, startDate, endDate, jurisdiction) {
+            return `
+                <div class="contract-header">
+                    <div class="contract-title">Consulting Services Agreement</div>
+                    <p>Agreement dated: ${formatDate(startDate)}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <p>This Agreement is made and effective as of ${formatDate(startDate)} between:</p>
+                    <p><strong>${providerName}</strong> (hereinafter referred to as "Consultant")</p>
+                    <p>AND</p>
+                    <p><strong>${clientName}</strong> (hereinafter referred to as "Client")</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">1. Services</div>
+                    <p>The Consultant agrees to provide the following consulting services: ${projectDescription}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">2. Scope of Work</div>
+                    <p>${projectScope}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">3. Compensation</div>
+                    <p>${paymentTerms}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">4. Timeline</div>
+                    <p>The consulting engagement will begin on ${formatDate(startDate)} and is estimated to be completed by ${formatDate(endDate)}.</p>
+                    <p>Key milestones and deadlines: ${deadlines}</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">5. Independence of Consultant</div>
+                    <p>The Consultant is an independent contractor and not an employee of the Client.</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">6. Confidentiality</div>
+                    <p>Both parties agree to keep confidential any proprietary information received from the other party during the term of this agreement.</p>
+                </div>
+                
+                <div class="contract-section">
+                    <div class="contract-section-title">7. Governing Law</div>
+                    <p>This Agreement shall be governed by and construed in accordance with the laws of ${jurisdiction}.</p>
+                </div>
+                
+                <div class="signature-area">
+                    <div class="signature-line">
+                        <p>Consultant: ${providerName}</p>
+                        <p>Signature: _________________________</p>
+                        <p>Date: _________________________</p>
+                    </div>
+                    <div class="signature-line">
+                        <p>Client: ${clientName}</p>
+                        <p>Signature: _________________________</p>
+                        <p>Date: _________________________</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Helper function to format dates
+        function formatDate(dateString) {
+            if (dateString.startsWith('[')) return dateString;
+            
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+        
+        // Export functions
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Get contract content
+            const contractElement = document.getElementById('contractPreview');
+            const contractText = contractElement.textContent;
+            
+            // Add to PDF
+            doc.text(contractText, 10, 10, { maxWidth: 180 });
+            doc.save('contract.pdf');
+        }
+        
+        function exportDOCX() {
+            alert("DOCX export would typically require a server-side component for full functionality. In a real implementation, this would generate a downloadable .docx file.");
+            // This would normally use the docx library to generate a document
+            // For simplicity, we're just showing an alert in this example
+        }
+        
+        function printContract() {
+            const contractContent = document.getElementById('contractPreview').innerHTML;
+            const originalContent = document.body.innerHTML;
+            
+            document.body.innerHTML = contractContent;
+            window.print();
+            document.body.innerHTML = originalContent;
+            generateContract(); // Regenerate the contract in the preview pane
+        }
+        
+        function clearForm() {
+            if (confirm("Are you sure you want to clear all form data?")) {
+                document.getElementById('clientName').value = '';
+                document.getElementById('providerName').value = '';
+                document.getElementById('projectDescription').value = '';
+                document.getElementById('projectScope').value = '';
+                document.getElementById('paymentTerms').value = '';
+                document.getElementById('deadlines').value = '';
+                document.getElementById('jurisdiction').value = '';
+                
+                // Reset dates to default
+                document.getElementById('startDate').valueAsDate = new Date();
+                let endDate = new Date();
+                endDate.setMonth(endDate.getMonth() + 1);
+                document.getElementById('endDate').valueAsDate = endDate;
+                
+                document.getElementById('contractPreview').innerHTML = `
+                    <div class="contract-header">
+                        <div class="contract-title">Professional Services Agreement</div>
+                        <p>Fill out the form and click "Generate Contract" to create your customized contract</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Modal functions
+        function showClauseLibrary() {
+            document.getElementById('clauseLibraryModal').style.display = 'flex';
+        }
+        
+        function showSignatureModal() {
+            document.getElementById('signatureModal').style.display = 'flex';
+        }
+        
+        function hideModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Clause library function
+        function addClause(clauseType) {
+            let clauseText = '';
+            
+            switch(clauseType) {
+                case 'confidentiality':
+                    clauseText = `<div class="contract-section">
+                        <div class="contract-section-title">Confidentiality Clause</div>
+                        <p>Both parties agree to keep confidential any proprietary information received from the other party during the term of this agreement. Neither party shall disclose such information to any third party without the prior written consent of the other party.</p>
+                    </div>`;
+                    break;
+                case 'termination':
+                    clauseText = `<div class="contract-section">
+                        <div class="contract-section-title">Termination Clause</div>
+                        <p>Either party may terminate this agreement with 30 days written notice to the other party. Upon termination, all rights and obligations will cease, except for those that by their nature should survive termination.</p>
+                    </div>`;
+                    break;
+                case 'intellectualProperty':
+                    clauseText = `<div class="contract-section">
+                        <div class="contract-section-title">Intellectual Property Clause</div>
+                        <p>All intellectual property rights in the work product shall belong to the Client upon full payment. The Service Provider assigns all rights, title, and interest in the work product to the Client.</p>
+                    </div>`;
+                    break;
+                default:
+                    clauseText = '';
+            }
+            
+            // Add the clause to the contract preview
+            const contractPreview = document.getElementById('contractPreview');
+            contractPreview.innerHTML += clauseText;
+            
+            // Hide the modal after selection
+            hideModal('clauseLibraryModal');
+        }
+        
+        // Save template function (simulated)
+        function saveTemplate() {
+            const templateName = prompt("Enter a name for this template:");
+            if (templateName) {
+                alert(`Template "${templateName}" saved successfully!`);
+                // In a real application, this would save to a database
+            }
+        }
+        
+        // Add collaborator function (simulated)
+        function addCollaborator() {
+            const email = prompt("Enter collaborator's email address:");
+            if (email) {
+                alert(`Invitation sent to ${email}`);
+                // In a real application, this would send an email invitation
+            }
+        }
+        
+        // Signature pad functions (simulated)
+        function clearSignature() {
+            alert("Signature cleared");
+            // In a real application, this would clear the canvas
+        }
+        
+        function saveSignature() {
+            alert("Signature saved");
+            hideModal('signatureModal');
+            // In a real application, this would save the signature image
+        }
+    </script>
+</body>
+</html>
